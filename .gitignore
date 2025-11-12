@@ -33,8 +33,11 @@ desktop.ini
 
 # 설정 파일 (개인 정보 포함 가능)
 server_info.json
-client_settings_pyqt.json
-unified_server_config_pyqt.json
+/client_settings_pyqt.json
+/unified_server_config_pyqt.json
+# MacOS 폴더의 설정은 포함
+!MacOS/client_settings_pyqt.json
+!MacOS/unified_server_config_pyqt.json
 
 # Cloudflare
 cloudflared/

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 탐색 - 원격 파일 공유</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 24px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .user-badge {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .btn-logout {
+            padding: 8px 16px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+            word-break: break-all;
+        }
+        
+        .breadcrumb strong {
+            color: #333;
+        }
+        
+        .actions {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .file-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .file-item {
+            padding: 20px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s;
+        }
+        
+        .file-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .file-icon {
+            font-size: 32px;
+            margin-right: 20px;
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .file-meta {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        
+        .empty-state {
+            padding: 60px 30px;
+            text-align: center;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 파일 탐색</h1>
+            <div class="header-actions">
+                <span class="user-badge">👤 {{ username }}</span>
+                <a href="/" class="btn btn-secondary">🏠 홈으로</a>
+                <a href="/logout" class="btn-logout">로그아웃</a>
+            </div>
+        </div>
+        
+        <div class="breadcrumb">
+            <strong>현재 위치:</strong> {{ current_path }}
+        </div>
+        
+        <div class="actions">
+            {% if parent %}
+            <a href="/browse?path={{ parent }}" class="btn btn-secondary">⬆️ 상위 폴더</a>
+            {% endif %}
+            <a href="/download_folder?path={{ current_path }}" class="btn btn-primary">📦 이 폴더 전체 다운로드 (ZIP)</a>
+        </div>
+        
+        <div class="file-list">
+            {% if files %}
+                {% for file in files %}
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">
+                            {% if file.is_dir %}📂{% else %}📄{% endif %}
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">{{ file.name }}</div>
+                            <div class="file-meta">
+                                {% if file.is_dir %}
+                                폴더
+                                {% else %}
+                                파일 크기: {{ "%.2f"|format(file.size / 1024 / 1024) }} MB
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        {% if file.is_dir %}
+                        <a href="/browse?path={{ file.path }}" class="btn btn-primary btn-small">📂 열기</a>
+                        <a href="/download_folder?path={{ file.path }}" class="btn btn-secondary btn-small">📦 다운로드</a>
+                        {% else %}
+                        <a href="/download?path={{ file.path }}" class="btn btn-primary btn-small">⬇️ 다운로드</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h2>폴더가 비어있습니다</h2>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

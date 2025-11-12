@@ -30,12 +30,6 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements_macos.txt
     
-    - name: 필요한 리소스 복사
-      run: |
-        cp client_settings_pyqt.json MacOS/
-        cp unified_server_config_pyqt.json MacOS/
-        cp -R templates MacOS/
-    
     - name: 빌드 스크립트 권한 부여
       run: |
         cd MacOS
