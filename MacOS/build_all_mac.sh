@@ -49,6 +49,23 @@ rm -rf build
 echo -e "${GREEN}OK: 정리 완료${NC}"
 echo ""
 
+# 필요한 리소스 동기화 (CI 환경 대비)
+echo -e "${BLUE}필요 파일 동기화 중...${NC}"
+# 클라이언트 설정
+if [ ! -f "client_settings_pyqt.json" ] && [ -f "../client_settings_pyqt.json" ]; then
+    cp "../client_settings_pyqt.json" "./client_settings_pyqt.json"
+fi
+# 서버 설정
+if [ ! -f "unified_server_config_pyqt.json" ] && [ -f "../unified_server_config_pyqt.json" ]; then
+    cp "../unified_server_config_pyqt.json" "./unified_server_config_pyqt.json"
+fi
+# Flask 템플릿 폴더
+if [ -d "../templates" ] && [ ! -d "./templates" ]; then
+    cp -R "../templates" "./templates"
+fi
+echo -e "${GREEN}OK: 동기화 완료${NC}"
+echo ""
+
 # 클라이언트 빌드
 echo -e "${BLUE}[3/6] 클라이언트 .app 빌드 중...${NC}"
 echo -e "${YELLOW}(시간이 걸릴 수 있습니다...)${NC}"
